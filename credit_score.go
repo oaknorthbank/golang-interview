@@ -1,12 +1,15 @@
 package creditscore
 
-import "time"
+import (
+	"math"
+	"time"
+)
 
-type InvoiceStatus string
+type InvoiceStatus int
 
 const (
-	Paid   InvoiceStatus = "PAID"
-	Unpaid InvoiceStatus = "UNPAID"
+	Paid InvoiceStatus = iota
+	Unpaid
 )
 
 type Invoice struct {
@@ -15,18 +18,20 @@ type Invoice struct {
 }
 
 type CreditReport struct {
-	PaymentHistory              []Invoice
+	PaymentHistory []*Invoice
+	// CreditCardBalance 		    string
+	// CreditLimit				    string
 	CreditUtilisationPercentage float64
 }
 
-type CreditScoreCategory string
+type CreditScoreCategory int
 
 const (
-	Fair      CreditScoreCategory = "fair"
-	Good      CreditScoreCategory = "good"
-	Excellent CreditScoreCategory = "excellent"
-	Poor      CreditScoreCategory = "poor"
-	VeryPoor  CreditScoreCategory = "very poor"
+	Fair CreditScoreCategory = iota
+	Good
+	Excellent
+	Poor
+	VeryPoor
 )
 
 type CreditScore struct {
@@ -34,38 +39,41 @@ type CreditScore struct {
 	Category CreditScoreCategory
 }
 
-func GetCreditScore(c CreditReport) CreditScore {
+func GetCreditScore(c *CreditReport) *CreditScore {
 	x := c.CreditUtilisationPercentage
 
 	switch {
 	case x > 0.9:
-		return CreditScore{
+		return &CreditScore{
 			Value:    560,
 			Category: VeryPoor,
 		}
 	case x > 0.7:
-		return CreditScore{
+		return &CreditScore{
 			Value:    720,
 			Category: Poor,
 		}
 	case x > 0.5:
-		return CreditScore{
+		return &CreditScore{
 			Value:    880,
 			Category: Fair,
 		}
 	case x > 0.3:
-		return CreditScore{
+		return &CreditScore{
 			Value:    960,
 			Category: Good,
 		}
 	default:
-		return CreditScore{
+		return &CreditScore{
 			Value:    999,
 			Category: Excellent,
 		}
 	}
 }
 
+// would it not be better to not prodive this function
+// and see if the candidate can implement it?
+// the credit report would have credit card balance and credit limit
 func CalculatePercentage(value, total float64) float64 {
-	return float64(int((value/total)*100)) / 100
+	return math.Round(value/total*100) / 100
 }
